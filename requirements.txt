@@ -1,0 +1,44 @@
+# NEXUS AI - Multi-Agent Trading System
+# Install: pip install -r requirements.txt
+
+# Data & Market APIs
+yfinance==0.2.40
+pandas==2.2.2
+numpy==1.26.4
+requests==2.32.3
+websocket-client==1.8.0
+
+# Technical Analysis
+pandas-ta==0.3.14b0
+ta==0.11.0
+
+# NLP / Sentiment
+textblob==0.18.0
+feedparser==6.0.11
+beautifulsoup4==4.12.3
+lxml==5.2.2
+
+# Async & Scheduling
+aiohttp==3.9.5
+apscheduler==3.10.4
+asyncio-mqtt==0.16.2
+
+# Telegram Bot
+python-telegram-bot==21.3
+
+# Database
+sqlalchemy==2.0.30
+aiosqlite==0.20.0
+
+# API & Web
+fastapi==0.111.0
+uvicorn==0.30.1
+python-dotenv==1.0.1
+
+# Backtesting
+backtesting==0.3.3
+
+# Utilities
+loguru==0.7.2
+pydantic==2.7.3
+rich==13.7.1

@@ -1,0 +1,65 @@
+# render.yaml — Deploy NEXUS AI backend to Render.com
+# Connect your GitHub repo at https://dashboard.render.com
+# Render will auto-deploy on every git push to main/master
+
+services:
+  - type: web
+    name: nexus-ai-api
+    runtime: python
+    region: oregon          # or frankfurt for EU users
+    plan: starter           # $7/mo — always-on (free tier sleeps after 15min)
+    branch: master
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py --api
+    healthCheckPath: /health
+    envVars:
+      # Set these in Render dashboard → Environment tab (never commit real values)
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false         # prompts you to enter manually in dashboard
+      - key: TELEGRAM_CHANNEL_ID
+        sync: false
+      - key: TELEGRAM_ADMIN_ID
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ADMIN_SECRET
+        sync: false
+      - key: PAPER_TRADING
+        value: "true"
+      - key: RISK_PER_TRADE
+        value: "0.01"
+      - key: ACCOUNT_BALANCE
+        value: "10000"
+      - key: MIN_CONFIDENCE
+        value: "65"
+      - key: SIGNAL_INTERVAL_MINS
+        value: "15"
+      - key: CRYPTO_WATCHLIST
+        value: "BTC-USD,ETH-USD,SOL-USD,BNB-USD,AVAX-USD"
+      - key: STOCKS_WATCHLIST
+        value: "NVDA,AAPL,TSLA,SPY,QQQ"
+      - key: FOREX_WATCHLIST
+        value: "EURUSD=X,GBPUSD=X,USDJPY=X"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+    # Persistent disk for SQLite database
+    disk:
+      name: nexus-ai-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+
+  # Optional: run the full system (scheduler + bot + API) as a background worker
+  # Uncomment this and comment out the web service above if you want Telegram signals
+  # - type: worker
+  #   name: nexus-ai-worker
+  #   runtime: python
+  #   plan: starter
+  #   branch: master
+  #   buildCommand: pip install -r requirements.txt
+  #   startCommand: python main.py
+  #   envVars:
+  #     - key: TELEGRAM_BOT_TOKEN
+  #       sync: false
+  #     - key: PAPER_TRADING
+  #       value: "true"

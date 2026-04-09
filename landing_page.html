@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="NEXUS AI — Multi-agent trading signals for crypto, stocks and forex. Real-time Buy/Sell signals with TP, SL and dynamic risk management.">
+<meta property="og:title" content="NEXUS AI — Precision Trading Signals">
+<meta property="og:description" content="6 AI agents. One signal. Crypto, stocks and forex coverage 24/7.">
+<title>NEXUS AI — Precision Trading Signals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#04060d;
+  --bg2:#080d1a;
+  --card:#0c1322;
+  --border:rgba(56,100,255,.15);
+  --border2:rgba(56,100,255,.35);
+  --accent:#3864ff;
+  --accent2:#00e8b0;
+  --text:#eef0f8;
+  --muted:#6b7a99;
+  --green:#00e8b0;
+  --red:#ff4560;
+  --amber:#ffb020;
+  --font:'DM Sans',sans-serif;
+  --display:'Syne',sans-serif;
+  --mono:'DM Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:hidden;line-height:1.6}
+
+/* ── GRAIN OVERLAY ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:1;opacity:.5
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px;height:64px;
+  background:rgba(4,6,13,.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  transition:background .3s
+}
+.nav-logo{font-family:var(--display);font-size:18px;font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(135deg,#fff 0%,var(--accent2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:400;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-live{display:flex;align-items:center;gap:7px;font-size:11px;font-family:var(--mono);color:var(--green)}
+.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.nav-btn{padding:9px 22px;border-radius:8px;font-size:13px;font-family:var(--font);font-weight:500;
+  cursor:pointer;text-decoration:none;transition:all .2s;display:inline-block}
+.nav-btn-ghost{background:none;color:var(--text);border:1px solid var(--border2)}
+.nav-btn-ghost:hover{background:rgba(56,100,255,.1)}
+.nav-btn-primary{background:var(--accent);color:#fff;border:none}
+.nav-btn-primary:hover{background:#4d78ff;transform:translateY(-1px)}
+@media(max-width:768px){.nav-links{display:none}.nav-live{display:none}}
+
+/* ── TICKER ── */
+.ticker{
+  position:fixed;top:64px;left:0;right:0;z-index:99;
+  height:36px;overflow:hidden;
+  background:rgba(8,13,26,.95);border-bottom:1px solid var(--border);
+  display:flex;align-items:center
+}
+.ticker-track{display:flex;gap:0;animation:scroll 40s linear infinite;white-space:nowrap;will-change:transform}
+.ticker-track:hover{animation-play-state:paused}
+@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tick{display:flex;align-items:center;gap:8px;padding:0 24px;font-family:var(--mono);font-size:11px;border-right:1px solid var(--border)}
+.tick-sym{color:var(--text);font-weight:500}
+.tick-price{color:var(--muted)}
+.tick-up{color:var(--green)}.tick-down{color:var(--red)}
+.tick-signal{padding:1px 7px;border-radius:3px;font-size:10px;font-weight:500}
+.tick-buy{background:rgba(0,232,176,.15);color:var(--green)}
+.tick-sell{background:rgba(255,69,96,.15);color:var(--red)}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;padding:140px 24px 80px;
+  position:relative
+}
+/* Radial grid lines */
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(56,100,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56,100,255,.04) 1px, transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 40%, black 30%, transparent 100%)
+}
+.hero-glow{
+  position:absolute;top:20%;left:50%;transform:translateX(-50%);
+  width:800px;height:500px;
+  background:radial-gradient(ellipse,rgba(56,100,255,.12) 0%,transparent 65%);
+  pointer-events:none
+}
+.hero-glow2{
+  position:absolute;top:30%;left:30%;
+  width:400px;height:400px;
+  background:radial-gradient(circle,rgba(0,232,176,.06) 0%,transparent 70%);
+  pointer-events:none
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(56,100,255,.1);border:1px solid rgba(56,100,255,.25);
+  border-radius:100px;padding:6px 18px;margin-bottom:32px;
+  font-size:12px;font-family:var(--mono);color:var(--accent2);letter-spacing:.08em
+}
+h1{
+  font-family:var(--display);font-size:clamp(42px,7vw,88px);
+  font-weight:800;line-height:1.0;letter-spacing:-.04em;
+  max-width:900px;margin-bottom:24px
+}
+h1 em{
+  font-style:normal;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent
+}
+.hero-sub{
+  font-size:18px;color:var(--muted);max-width:520px;
+  margin-bottom:48px;font-weight:300;line-height:1.7
+}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:72px}
+.btn-xl{
+  padding:16px 36px;border-radius:12px;font-size:15px;
+  font-family:var(--font);font-weight:500;cursor:pointer;
+  text-decoration:none;display:inline-block;transition:all .25s
+}
+.btn-accent{background:var(--accent);color:#fff;border:none;box-shadow:0 0 40px rgba(56,100,255,.3)}
+.btn-accent:hover{background:#4d78ff;transform:translateY(-2px);box-shadow:0 0 60px rgba(56,100,255,.4)}
+.btn-outline{background:none;color:var(--text);border:1px solid rgba(255,255,255,.15)}
+.btn-outline:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.3)}
+
+/* ── STATS ROW ── */
+.stats-row{display:flex;gap:0;flex-wrap:wrap;justify-content:center;
+  border:1px solid var(--border);border-radius:16px;overflow:hidden;
+  background:var(--card);max-width:720px;width:100%}
+.stat{flex:1;min-width:140px;padding:24px;text-align:center;border-right:1px solid var(--border)}
+.stat:last-child{border-right:none}
+.stat-n{font-family:var(--display);font-size:32px;font-weight:700;line-height:1}
+.stat-n.g{color:var(--green)}.stat-n.b{color:var(--accent)}
+.stat-l{font-size:11px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;
+  letter-spacing:.1em;margin-top:6px}
+
+/* ── SECTIONS ── */
+section{padding:100px 24px;max-width:1100px;margin:0 auto;position:relative;z-index:2}
+.tag{display:inline-block;font-size:11px;font-family:var(--mono);color:var(--accent2);
+  text-transform:uppercase;letter-spacing:.15em;margin-bottom:16px}
+h2{font-family:var(--display);font-size:clamp(30px,4vw,52px);font-weight:700;
+  letter-spacing:-.03em;line-height:1.1;margin-bottom:16px}
+.sec-desc{font-size:16px;color:var(--muted);max-width:500px;margin-bottom:56px;font-weight:300}
+
+/* ── HOW IT WORKS ── */
+.pipeline{display:flex;align-items:center;gap:0;overflow-x:auto;padding-bottom:8px;
+  scrollbar-width:none}
+.pipeline::-webkit-scrollbar{display:none}
+.pipe-node{
+  flex-shrink:0;background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:20px 24px;min-width:160px;text-align:center;
+  position:relative;transition:border-color .2s,transform .2s
+}
+.pipe-node:hover{border-color:var(--border2);transform:translateY(-3px)}
+.pipe-icon{font-size:28px;margin-bottom:10px;display:block}
+.pipe-name{font-size:13px;font-weight:500;margin-bottom:4px}
+.pipe-desc{font-size:11px;color:var(--muted)}
+.pipe-arrow{flex-shrink:0;color:var(--border2);font-size:22px;padding:0 8px;align-self:center}
+.pipe-node.highlighted{border-color:var(--accent2);box-shadow:0 0 30px rgba(0,232,176,.1)}
+
+/* ── SIGNAL CARD ── */
+.signals-showcase{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:48px}
+.sig-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:22px;position:relative;overflow:hidden;
+  transition:border-color .2s,transform .2s
+}
+.sig-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.sig-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.sig-card.buy::before{background:linear-gradient(90deg,var(--green),transparent)}
+.sig-card.sell::before{background:linear-gradient(90deg,var(--red),transparent)}
+.sig-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.sig-asset{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:-.02em}
+.sig-badge{padding:4px 12px;border-radius:6px;font-size:12px;font-family:var(--mono);font-weight:500}
+.sig-badge.buy{background:rgba(0,232,176,.15);color:var(--green)}
+.sig-badge.sell{background:rgba(255,69,96,.15);color:var(--red)}
+.sig-price{font-family:var(--mono);font-size:26px;font-weight:500;margin-bottom:16px}
+.sig-levels{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.sig-level{background:rgba(255,255,255,.03);border-radius:8px;padding:10px 12px}
+.sig-level-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono);margin-bottom:4px}
+.sig-level-v{font-size:14px;font-family:var(--mono);font-weight:500}
+.sig-level-v.tp{color:var(--green)}.sig-level-v.sl{color:var(--red)}
+.sig-footer{display:flex;justify-content:space-between;align-items:center}
+.sig-strat{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.conf-pill{display:flex;align-items:center;gap:6px}
+.conf-track{width:52px;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.conf-fill{height:100%;border-radius:2px}
+.conf-pct{font-size:11px;font-family:var(--mono);color:var(--muted)}
+
+/* ── PRICING ── */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.plan{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:20px;padding:36px;display:flex;flex-direction:column;
+  transition:border-color .2s,transform .2s;position:relative
+}
+.plan:hover{transform:translateY(-4px);border-color:var(--border2)}
+.plan.featured{border-color:var(--accent);box-shadow:0 0 60px rgba(56,100,255,.15)}
+.plan-pop{
+  position:absolute;top:-13px;left:50%;transform:translateX(-50%);
+  background:var(--accent);color:#fff;font-size:11px;font-family:var(--mono);
+  padding:4px 18px;border-radius:100px;white-space:nowrap
+}
+.plan-tier{font-size:11px;font-family:var(--mono);color:var(--muted);
+  text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px}
+.plan-price{font-family:var(--display);font-size:48px;font-weight:700;letter-spacing:-.04em;line-height:1;margin-bottom:6px}
+.plan-price sub{font-size:16px;font-weight:400;color:var(--muted);vertical-align:middle}
+.plan-tagline{font-size:13px;color:var(--muted);margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid var(--border)}
+.plan-features{list-style:none;margin-bottom:36px;flex:1;display:flex;flex-direction:column;gap:10px}
+.plan-features li{font-size:14px;display:flex;gap:10px;align-items:flex-start;line-height:1.4}
+.plan-features li::before{content:'';display:inline-block;width:16px;height:16px;
+  background:rgba(0,232,176,.2);border-radius:50%;flex-shrink:0;margin-top:1px;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 8l3.5 3.5L13 5' stroke='%2300e8b0' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.plan-cta{
+  display:block;text-align:center;padding:14px;border-radius:10px;
+  font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;transition:all .2s
+}
+.cta-ghost{background:none;border:1px solid var(--border2);color:var(--text)}
+.cta-ghost:hover{background:rgba(56,100,255,.1)}
+.cta-primary{background:var(--accent);color:#fff;border:none;box-shadow:0 0 30px rgba(56,100,255,.25)}
+.cta-primary:hover{background:#4d78ff;box-shadow:0 0 50px rgba(56,100,255,.4)}
+
+/* ── PROOF / TESTIMONIALS ── */
+.proof-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.proof-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;
+  transition:border-color .2s
+}
+.proof-card:hover{border-color:var(--border2)}
+.proof-quote{font-size:15px;line-height:1.7;margin-bottom:20px;color:rgba(238,240,248,.8)}
+.proof-author{display:flex;align-items:center;gap:12px}
+.proof-avatar{width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;
+  font-family:var(--display);flex-shrink:0}
+.proof-name{font-size:13px;font-weight:500}
+.proof-handle{font-size:12px;color:var(--muted)}
+.stars{color:var(--amber);font-size:12px;margin-bottom:12px;letter-spacing:2px}
+
+/* ── FAQ ── */
+.faq{max-width:700px;margin:0 auto}
+.faq-item{border-bottom:1px solid var(--border);padding:20px 0;cursor:pointer}
+.faq-q{display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:500}
+.faq-chevron{color:var(--muted);font-size:18px;transition:transform .3s;flex-shrink:0}
+.faq-item.open .faq-chevron{transform:rotate(45deg);color:var(--accent2)}
+.faq-a{font-size:14px;color:var(--muted);line-height:1.7;max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s}
+.faq-item.open .faq-a{max-height:200px;padding-top:12px}
+
+/* ── CTA BANNER ── */
+.cta-banner{
+  background:linear-gradient(135deg,rgba(56,100,255,.15) 0%,rgba(0,232,176,.08) 100%);
+  border:1px solid rgba(56,100,255,.25);border-radius:24px;padding:64px 40px;
+  text-align:center;position:relative;overflow:hidden
+}
+.cta-banner::before{
+  content:'';position:absolute;top:-50%;left:50%;transform:translateX(-50%);
+  width:600px;height:300px;
+  background:radial-gradient(ellipse,rgba(56,100,255,.15) 0%,transparent 70%);
+  pointer-events:none
+}
+.cta-banner h2{font-family:var(--display);font-size:clamp(28px,4vw,48px);margin-bottom:16px}
+.cta-banner p{color:var(--muted);margin-bottom:36px;font-size:16px}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);padding:48px 24px;
+  max-width:1100px;margin:0 auto;
+  display:grid;grid-template-columns:1fr auto;gap:40px;align-items:start
+}
+.footer-brand{max-width:280px}
+.footer-logo{font-family:var(--display);font-size:20px;font-weight:800;letter-spacing:-.03em;
+  background:linear-gradient(135deg,#fff,var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.footer-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.footer-links{display:flex;gap:28px;flex-wrap:wrap;justify-content:flex-end}
+.footer-links a{font-size:13px;color:var(--muted);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:11px;color:rgba(107,122,153,.5);margin-top:12px;font-family:var(--mono)}
+@media(max-width:600px){footer{grid-template-columns:1fr}.footer-links{justify-content:flex-start}}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{opacity:0;animation:fadeUp .7s ease forwards}
+.delay-1{animation-delay:.1s}.delay-2{animation-delay:.2s}
+.delay-3{animation-delay:.35s}.delay-4{animation-delay:.5s}
+
+/* ── DISCLAIMER ── */
+.disclaimer{
+  background:rgba(255,176,32,.05);border:1px solid rgba(255,176,32,.2);
+  border-radius:10px;padding:14px 20px;font-size:12px;color:var(--amber);
+  line-height:1.6;text-align:center;max-width:700px;margin:0 auto
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">NEXUS AI</div>
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#signals">Signals</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="nav-live"><div class="live-dot"></div>LIVE</div>
+    <a href="https://t.me/YOUR_CHANNEL" class="nav-btn nav-btn-ghost">Join Telegram</a>
+    <a href="#pricing" class="nav-btn nav-btn-primary">Get Signals</a>
+  </div>
+</nav>
+
+<!-- LIVE TICKER -->
+<div class="ticker">
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-eyebrow fade-up"><div class="live-dot"></div>6 AI Agents · Live 24/7</div>
+  <h1 class="fade-up delay-1">Trade Smarter<br>With <em>AI Signals</em></h1>
+  <p class="hero-sub fade-up delay-2">Multi-agent intelligence that crawls markets, reads sentiment, detects patterns and fires precise Buy/Sell signals — with TP, SL and R:R on every trade.</p>
+  <div class="hero-actions fade-up delay-3">
+    <a href="https://t.me/YOUR_CHANNEL" class="btn-xl btn-accent">→ Join Free Channel</a>
+    <a href="#pricing" class="btn-xl btn-outline">View Plans</a>
+  </div>
+  <div class="stats-row fade-up delay-4">
+    <div class="stat"><div class="stat-n g" id="stat-wr">73.4%</div><div class="stat-l">Win Rate</div></div>
+    <div class="stat"><div class="stat-n" id="stat-sigs">1,240+</div><div class="stat-l">Signals Fired</div></div>
+    <div class="stat"><div class="stat-n g">2.4:1</div><div class="stat-l">Avg R:R</div></div>
+    <div class="stat"><div class="stat-n b">14</div><div class="stat-l">Assets Covered</div></div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="tag">Architecture</div>
+  <h2>Six agents.<br>One precise signal.</h2>
+  <p class="sec-desc">Each agent specialises in one layer. The ensemble only fires when multiple agents agree.</p>
+  <div class="pipeline">
+    <div class="pipe-node"><span class="pipe-icon">🕷</span><div class="pipe-name">Crawler</div><div class="pipe-desc">OHLCV + News<br>40+ sources</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node"><span class="pipe-icon">📐</span><div class="pipe-name">Technical</div><div class="pipe-desc">20+ indicators<br>RSI, MACD, BB</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node highlighted"><span class="pipe-icon">💬</span><div class="pipe-name">Sentiment</div><div class="pipe-desc">AI NLP<br>News scoring</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node"><span class="pipe-icon">📊</span><div class="pipe-name">Pattern</div><div class="pipe-desc">H&S, Flags<br>Triangles</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node highlighted"><span class="pipe-icon">🧠</span><div class="pipe-name">Strategy</div><div class="pipe-desc">6-strategy<br>ensemble vote</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node"><span class="pipe-icon">⚖️</span><div class="pipe-name">Risk</div><div class="pipe-desc">ATR TP/SL<br>R:R ≥ 1.5</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node" style="border-color:var(--accent2);box-shadow:0 0 30px rgba(0,232,176,.12)">
+      <span class="pipe-icon">📡</span><div class="pipe-name">Signal</div><div class="pipe-desc">Telegram<br>+ API</div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE SIGNALS SHOWCASE -->
+<section id="signals" style="padding-top:0">
+  <div class="tag">Live Signals</div>
+  <h2>What you'll receive</h2>
+  <p class="sec-desc">Every signal includes entry price, take profit, stop loss, confidence score and strategy reasoning.</p>
+  <div class="signals-showcase" id="signals-showcase"></div>
+  <div class="disclaimer">⚠️ Past signal performance does not guarantee future results. Always manage your risk — never risk more than 1–2% of your account per trade. These signals are for informational purposes only and do not constitute financial advice.</div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="tag">Plans</div>
+  <h2>Simple pricing.<br>Cancel anytime.</h2>
+  <p class="sec-desc">All plans include real-time Telegram signals with entry, TP, SL and R:R on every trade.</p>
+  <div class="pricing-grid">
+
+    <div class="plan">
+      <div class="plan-tier">Starter</div>
+      <div class="plan-price">$29<sub>/mo</sub></div>
+      <div class="plan-tagline">Perfect for getting started with crypto signals</div>
+      <ul class="plan-features">
+        <li>Crypto signals only (BTC, ETH, SOL, BNB)</li>
+        <li>Entry price, TP &amp; SL on every signal</li>
+        <li>Up to 15 signals per week</li>
+        <li>Private Telegram channel access</li>
+        <li>Signal confidence score</li>
+      </ul>
+      <a href="https://buy.stripe.com/YOUR_STARTER_LINK" class="plan-cta cta-ghost">Get Started →</a>
+    </div>
+
+    <div class="plan featured">
+      <div class="plan-pop">Most Popular</div>
+      <div class="plan-tier">Pro</div>
+      <div class="plan-price">$79<sub>/mo</sub></div>
+      <div class="plan-tagline">Full coverage across all asset classes</div>
+      <ul class="plan-features">
+        <li>Crypto + Stocks + Forex signals</li>
+        <li>AI sentiment analysis on every signal</li>
+        <li>Multi-timeframe confirmation</li>
+        <li>Up to 40 signals per week</li>
+        <li>Priority support group</li>
+        <li>Pattern detection alerts</li>
+        <li>API access included</li>
+      </ul>
+      <a href="https://buy.stripe.com/YOUR_PRO_LINK" class="plan-cta cta-primary">Get Pro Access →</a>
+    </div>
+
+    <div class="plan">
+      <div class="plan-tier">Enterprise</div>
+      <div class="plan-price">$299<sub>/mo</sub></div>
+      <div class="plan-tagline">For serious traders and small funds</div>
+      <ul class="plan-features">
+        <li>Everything in Pro</li>
+        <li>Webhook / REST API delivery</li>
+        <li>Custom watchlist (up to 30 symbols)</li>
+        <li>Backtest reports on request</li>
+        <li>Strategy performance analytics</li>
+        <li>White-label option available</li>
+        <li>1-on-1 onboarding call</li>
+      </ul>
+      <a href="mailto:contact@nexusai.trade" class="plan-cta cta-ghost">Contact Us →</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<section id="proof">
+  <div class="tag">Community</div>
+  <h2>What traders are saying</h2>
+  <div class="proof-grid">
+    <div class="proof-card">
+      <div class="stars">★★★★★</div>
+      <p class="proof-quote">"Hit 3 TPs in a row on BTC last week. The multi-timeframe confirmation is what sets this apart — no random noise signals."</p>
+      <div class="proof-author"><div class="proof-avatar">MR</div><div><div class="proof-name">Marcus R.</div><div class="proof-handle">Pro subscriber · Crypto trader</div></div></div>
+    </div>
+    <div class="proof-card">
+      <div class="stars">★★★★★</div>
+      <p class="proof-quote">"The R:R filter alone is worth the subscription. I stopped taking bad trades because every signal has at least 1.5:1 before it fires."</p>
+      <div class="proof-author"><div class="proof-avatar">SL</div><div><div class="proof-name">Sofia L.</div><div class="proof-handle">Starter subscriber · Swing trader</div></div></div>
+    </div>
+    <div class="proof-card">
+      <div class="stars">★★★★★</div>
+      <p class="proof-quote">"Enterprise API integration was seamless. We feed the signals directly into our execution system. Support was excellent throughout setup."</p>
+      <div class="proof-author"><div class="proof-avatar">TK</div><div><div class="proof-name">Thomas K.</div><div class="proof-handle">Enterprise · Prop firm</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" style="padding-bottom:60px">
+  <div class="tag">FAQ</div>
+  <h2 style="text-align:center;margin-bottom:48px">Common questions</h2>
+  <div class="faq">
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">What assets do you cover? <span class="faq-chevron">+</span></div>
+      <div class="faq-a">Starter covers the top 4 crypto pairs (BTC, ETH, SOL, BNB). Pro and Enterprise add US stocks (NVDA, AAPL, TSLA, SPY, QQQ) and major forex pairs (EUR/USD, GBP/USD, USD/JPY). Custom watchlists are available on Enterprise.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">How many signals per week? <span class="faq-chevron">+</span></div>
+      <div class="faq-a">Starter receives up to 15 signals per week. Pro receives up to 40. Quality is always prioritised over quantity — signals are filtered to confidence ≥65% and R:R ≥1.5:1, so some weeks may have fewer but higher-quality signals.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">How does the AI actually work? <span class="faq-chevron">+</span></div>
+      <div class="faq-a">Six specialised agents run in parallel: a data crawler fetches price data and news, a technical agent computes 20+ indicators, a sentiment agent uses NLP to score news headlines, a pattern agent detects chart patterns, a strategy engine runs a 6-strategy weighted ensemble, and a risk agent computes ATR-based TP/SL levels. Only signals where multiple agents agree are published.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Is this financial advice? <span class="faq-chevron">+</span></div>
+      <div class="faq-a">No. NEXUS AI provides informational trading signals only. We are not regulated financial advisors. Never risk money you cannot afford to lose, and always conduct your own research before making any trading decision. Past signal performance does not guarantee future results.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Can I cancel anytime? <span class="faq-chevron">+</span></div>
+      <div class="faq-a">Yes, subscriptions can be cancelled at any time with no penalty. You retain access until the end of your current billing period. Contact us via Telegram or email and cancellation is processed within 24 hours.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Do you offer an API? <span class="faq-chevron">+</span></div>
+      <div class="faq-a">Yes. Pro and Enterprise subscribers receive an API key to access signals programmatically via REST endpoints. Enterprise also includes webhook delivery with HMAC-signed payloads so signals push directly to your system in real time.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section>
+  <div class="cta-banner">
+    <h2>Start receiving signals today</h2>
+    <p>Join the free Telegram channel first — no credit card required.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a href="https://t.me/YOUR_CHANNEL" class="btn-xl btn-accent">→ Join Free Channel</a>
+      <a href="#pricing" class="btn-xl btn-outline">View Plans</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <div class="footer-logo">NEXUS AI</div>
+    <div class="footer-desc">Multi-agent AI trading signals for crypto, stocks and forex. Powered by 6 specialised agents running 24/7.</div>
+    <div class="footer-copy" style="margin-top:16px">© 2025 NEXUS AI · Not financial advice</div>
+  </div>
+  <div>
+    <div class="footer-links">
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="https://t.me/YOUR_CHANNEL">Telegram</a>
+      <a href="mailto:contact@nexusai.trade">Contact</a>
+      <a href="/dashboard">Admin</a>
+    </div>
+    <div class="footer-copy" style="text-align:right;margin-top:12px">Trading involves risk of loss</div>
+  </div>
+</footer>
+
+<script>
+// ── Ticker ────────────────────────────────────────────────────
+const TICKERS=[
+  {s:'BTC/USD',p:'$96,420',c:'+2.4%',up:true,sig:'BUY'},
+  {s:'ETH/USD',p:'$3,148',c:'+1.8%',up:true,sig:'BUY'},
+  {s:'SOL/USD',p:'$168.40',c:'-0.9%',up:false,sig:'HOLD'},
+  {s:'NVDA',p:'$874.20',c:'+3.1%',up:true,sig:'BUY'},
+  {s:'EUR/USD',p:'1.0842',c:'-0.2%',up:false,sig:'SELL'},
+  {s:'GOLD',p:'$2,312',c:'+0.7%',up:true,sig:'BUY'},
+  {s:'SPY',p:'$512.30',c:'+0.5%',up:true,sig:'BUY'},
+  {s:'BNB/USD',p:'$605',c:'+1.2%',up:true,sig:'BUY'},
+  {s:'GBP/JPY',p:'191.80',c:'-0.4%',up:false,sig:'SELL'},
+  {s:'QQQ',p:'$441',c:'+0.8%',up:true,sig:'BUY'},
+];
+const tt=document.getElementById('ticker-track');
+const tickHTML=[...TICKERS,...TICKERS].map(t=>
+  `<div class="tick">
+    <span class="tick-sym">${t.s}</span>
+    <span class="tick-price">${t.p}</span>
+    <span class="${t.up?'tick-up':'tick-down'}">${t.c}</span>
+    <span class="tick-signal ${t.sig.toLowerCase()==='buy'?'tick-buy':t.sig.toLowerCase()==='sell'?'tick-sell':''}">${t.sig}</span>
+  </div>`).join('');
+if(tt) tt.innerHTML=tickHTML;
+
+// ── Signal showcase ───────────────────────────────────────────
+const SIGNALS=[
+  {asset:'BTC/USD',action:'buy',price:'$96,420',tp:'$102,800',sl:'$93,100',conf:82,strat:'EMA Cross + MACD'},
+  {asset:'ETH/USD',action:'buy',price:'$3,148',tp:'$3,540',sl:'$2,980',conf:74,strat:'RSI Reversal + Volume'},
+  {asset:'NVDA',action:'buy',price:'$874.20',tp:'$940.00',sl:'$840.00',conf:79,strat:'Momentum + Pattern'},
+  {asset:'EUR/USD',action:'sell',price:'1.0842',tp:'1.0760',sl:'1.0900',conf:68,strat:'Mean Reversion'},
+  {asset:'SOL/USD',action:'buy',price:'$168.40',tp:'$195.00',sl:'$155.00',conf:71,strat:'Breakout + BB'},
+  {asset:'SPY',action:'buy',price:'$512.30',tp:'$528.00',sl:'$504.00',conf:77,strat:'EMA + S/R Bounce'},
+];
+const sc=document.getElementById('signals-showcase');
+if(sc){
+  sc.innerHTML=SIGNALS.slice(0,3).map(s=>{
+    const c=s.conf>=75?'#00e8b0':s.conf>=60?'#ffb020':'#ff4560';
+    return`<div class="sig-card ${s.action}">
+      <div class="sig-top">
+        <div class="sig-asset">${s.asset}</div>
+        <span class="sig-badge ${s.action}">${s.action.toUpperCase()}</span>
+      </div>
+      <div class="sig-price">${s.price}</div>
+      <div class="sig-levels">
+        <div class="sig-level"><div class="sig-level-l">Take Profit</div><div class="sig-level-v tp">${s.tp}</div></div>
+        <div class="sig-level"><div class="sig-level-l">Stop Loss</div><div class="sig-level-v sl">${s.sl}</div></div>
+      </div>
+      <div class="sig-footer">
+        <div class="sig-strat">${s.strat}</div>
+        <div class="conf-pill">
+          <div class="conf-track"><div class="conf-fill" style="width:${s.conf}%;background:${c}"></div></div>
+          <span class="conf-pct">${s.conf}%</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── FAQ toggle ────────────────────────────────────────────────
+function toggleFaq(el){
+  const isOpen=el.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+  if(!isOpen) el.classList.add('open');
+}
+
+// ── Stats counter animation ───────────────────────────────────
+function animateCount(el,target,suffix,dec=0){
+  const start=performance.now();
+  const dur=1800;
+  const startVal=0;
+  function step(now){
+    const p=Math.min((now-start)/dur,1);
+    const ease=1-Math.pow(1-p,3);
+    const val=startVal+(target-startVal)*ease;
+    el.textContent=(dec?val.toFixed(dec):Math.round(val))+suffix;
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      animateCount(document.getElementById('stat-wr'),73.4,'%',1);
+      observer.disconnect();
+    }
+  });
+},{threshold:.5});
+const statsEl=document.querySelector('.stats-row');
+if(statsEl) observer.observe(statsEl);
+</script>
+</body>
+</html>
